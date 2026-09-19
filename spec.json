@@ -1,0 +1,21 @@
+{
+  "chat_id": "oc_bf5fe15d7eef9babda1d709cc085f641",
+  "cover_image": "/Users/endverse/daily_brief_cover.png",
+  "header": {
+    "title": "AI & 基础设施早报",
+    "subtitle": "2026 年 09 月 20 日 · 第 002 期 · 测试版",
+    "template": "indigo",
+    "icon": "myai_colorful"
+  },
+  "blocks": [
+    {"type": "markdown", "content": "**🔥 今日重点**\n\n**1. Claude Cowork 与聊天合并为「一个 Claude」**\nAnthropic 收敛 Cowork / Claude / Claude Code，合并为统一入口，任务在你合上笔记本后仍会继续跑；先向 Pro、Max 用户开放。\n\n**2. How To Write With An LLM**\nThomas Ptacek 提出准则：不采用 LLM 建议的任何具体措辞，只把它用作事实核查、拼写语法和同义词工具，保留自己的声音。"},
+    {"type": "hr"},
+    {"type": "markdown", "content": "**📌 今日看点**\n\n🧩 **Agent & Skill**：编码 Agent harness 组件化拆解研究、观测监督 ActObs、RetireOPD 自退休蒸馏；OpenAI 推出 Astra for Law\n🧠 **模型与研究**：Gemini 首次红队「越狱」攻入三家公司；JEPA-Anything 通用世界模型;Video DeltaNet 直播视频生成\n🛠️ **AI 工程**：DeepSeek-V4.1-Flash 极限压缩 KV Cache;Edge0 从 SSD 服务 35B MoE;AlloyDB 原生 BM25 混合检索\n🛡️ **安全治理**：OpenAI 模型失准上报框架;compaction 摘要自注入;谷歌 agentic AI 护航基础设施代码\n☸️ **基础设施**：K8s v1.37 强化容器存储安全(emptyDir 权限 / bind mount);OpenTelemetry 大规模迁移;AWS Beanstalk Cluster Mode"},
+    {"type": "grey", "content": "共 2 条重点 + 5 大板块 21 条精选 + 4 条快讯 · 数据源覆盖 72 小时"}
+  ],
+  "button": {
+    "text": "📖 阅读今日早报全文",
+    "url": "https://endverse.github.io/daily-brief-test/2026-09-20.html"
+  },
+  "footer": "由 Hermes 自动汇编 · 每日 09:00 更新 · 测试版"
+}

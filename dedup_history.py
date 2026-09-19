@@ -76,6 +76,12 @@ if __name__ == "__main__":
     items = json.load(open(path))
     if isinstance(items, dict):  # briefing.json 结构展开
         flat=[]
+        # 新 schema (render.py): highlights / sections[].categories[].items / flash
+        flat.extend(items.get("highlights",[]))
+        for sec in items.get("sections",[]):
+            for cat in sec.get("categories",[]):
+                flat.extend(cat.get("items",[]))
+        # 旧 schema 兼容: hot / boards
         for h in items.get("hot",[]): flat.append(h)
         for b in items.get("boards",{}).values():
             for c in b.values(): flat.extend(c)

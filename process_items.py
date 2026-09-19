@@ -55,14 +55,24 @@ CAT_RULES = {
                 "泄露", "leak", "监管", "regulat", "合规", "compliance", "risk", "风险",
                 "隐私", "privacy", "治理", "governance", "CVE", "对齐", "alignment"],
 }
-# 基础设施 4 类
+# 基础设施 4 类（按用户优先级：K8s×AI 第一 → K8s核心 → 云原生周边 → 社区）
 INFRA_CAT_RULES = {
-    "K8s 核心": ["kubernetes", "k8s", "kubelet", "kube", "KEP", "control plane", "调度"],
+    "K8s × AI": [  # K8s 与 AI 结合，用户最高优先级
+        "kubeflow", "kserve", "kubeai", "gpu operator", "device plugin", "mlops",
+        "model serving", "推理服务", "训练集群", "ai infra", "ai infrastructure",
+        "llm on kubernetes", "ai on kubernetes", "gpu scheduling", "gpu 调度",
+        "vllm", "ray on kubernetes", "分布式训练", "ai workload", "ai 工作负载",
+        "gke agent", "agent sandbox",
+    ],
+    "K8s 核心": ["kubernetes", "k8s", "kubelet", "kube", "KEP", "control plane", "调度",
+              "cni", "csi", "网络插件", "存储", "ingress", "operator", "helm"],
     "云原生周边": ["istio", "service mesh", "服务网格", "prometheus", "grafana", "可观测",
-               "argocd", "gitops", "etcd", "helm", "observability", "envoy", "cilium"],
+               "argocd", "gitops", "etcd", "observability", "envoy", "cilium"],
     "社区与项目": ["cncf", "graduated", "incubat", "sandbox", "毕业", "孵化", "开源项目", "release"],
     "公有云": ["aws", "azure", "gcp", "google cloud", "amazon", "microsoft", "阿里云", "腾讯云", "云服务"],
 }
+# 基础设施板块内展示顺序（用户指定优先级）
+INFRA_ORDER = ["K8s × AI", "K8s 核心", "云原生周边", "社区与项目", "公有云"]
 
 # 权威度评分（源 -> 分）
 AUTHORITY = {
@@ -96,21 +106,35 @@ def is_ai_related(it):
         return bool(AI_RE.search(text) or INFRA_RE.search(text))  # 云源留AI或infra相关
     return bool(AI_RE.search(text))
 
+def _is_k8s_ai(text):
+    """K8s×AI 判定：命中 K8s×AI 专有词，或(明确的K8s平台词 且 明确的AI词)。收紧避免误伤。"""
+    # 专有词直接命中
+    if any(re.search(re.escape(k), text, re.I) for k in INFRA_CAT_RULES["K8s × AI"]):
+        return True
+    # 需要明确的 K8s 平台词（不含泛化的 container/算力）
+    k8s_strong = re.search(r'kubernetes|k8s|\bkube\b|\bgke\b|\beks\b|\baks\b|云原生|cloud[ -]?native|cncf', text, re.I)
+    # 需要明确的 AI 平台词（不含泛化的"算力/模型"，要 agent/LLM/训练/推理/GPU 这类工程词）
+    ai_strong = re.search(r'\bAI\b|\bLLM\b|\bagent\b|智能体|机器学习|machine learning|深度学习|GPU|推理|inference|训练|training|模型服务|model serv', text, re.I)
+    return bool(k8s_strong and ai_strong)
+
 def classify(it):
     text = f"{it['title']} {it['summary']}"
-    # 基础设施板块判定
-    if it["source_cat"] in ("基础设施", "公有云") or INFRA_RE.search(text):
-        if it["source_cat"] == "公有云" and AI_RE.search(text) and not INFRA_RE.search(text):
-            pass  # 落到AI板块
+    # K8s×AI 优先判定（含 GitHub 上 K8s+AI 类开源项目，跨板块抢占）
+    if _is_k8s_ai(text):
+        return "基础设施", "K8s × AI"
+    # 基础设施板块判定：仅限基础设施源，或明确的 K8s/云原生强信号
+    infra_strong = re.search(r'kubernetes|k8s|\bkube\b|云原生|cloud[ -]?native|cncf|istio|service mesh|服务网格|argocd|gitops|helm chart', text, re.I)
+    if it["source_cat"] in ("基础设施", "公有云") or infra_strong:
+        if it["source_cat"] == "公有云" and AI_RE.search(text) and not infra_strong:
+            pass  # 公有云源里的纯 AI 内容落到 AI 板块
         else:
-            for cat, kws in INFRA_CAT_RULES.items():
-                if any(re.search(re.escape(k), text, re.I) for k in kws):
+            for cat in INFRA_ORDER:
+                if any(re.search(re.escape(k), text, re.I) for k in INFRA_CAT_RULES[cat]):
                     return "基础设施", cat
             return "基础设施", "社区与项目"
     # AI 板块 6 类 —— 按优先级判定：安全 > 产品商业 > Agent > 工程 > 观点 > 模型研究(兜底)
     scores = {cat: sum(1 for k in kws if re.search(re.escape(k), text, re.I)) for cat, kws in CAT_RULES.items()}
     PRIORITY = ["安全与治理", "产品与商业", "Agent & Skill", "AI 工程落地", "观点与好文", "模型与研究"]
-    # 命中数最高者优先；并列时按 PRIORITY 顺序
     best = max(PRIORITY, key=lambda c: (scores[c], -PRIORITY.index(c)))
     if scores[best] == 0:
         best = "AI 工程落地" if it["source"] in ("GitHub Trending","GitHub 升星repo") else "模型与研究"

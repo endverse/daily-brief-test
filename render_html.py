@@ -24,8 +24,9 @@ import json, html, sys, datetime
 AI_CATS = [("🧠","模型与研究","Models & Research"),("🧩","Agent & Skill","Agents & Skills"),
            ("🛠️","AI 工程落地","Engineering"),("📊","产品与商业","Product & Biz"),
            ("💡","观点与好文","Opinion"),("🛡️","安全与治理","Safety")]
-INFRA_CATS = [("☸️","K8s 核心","Kubernetes"),("🌐","云原生周边","Cloud Native"),
-              ("📦","社区与项目","Community"),("☁️","公有云","Public Cloud")]
+INFRA_CATS = [("🤖☸️","K8s × AI","K8s × AI"),("☸️","K8s 核心","Kubernetes"),
+              ("🌐","云原生周边","Cloud Native"),("📦","社区与项目","Community"),
+              ("☁️","公有云","Public Cloud")]
 
 STYLE = """  :root{
     --ink:#15130f; --paper:#e9e2d6; --red:#d7382f; --sub:#6d6459;

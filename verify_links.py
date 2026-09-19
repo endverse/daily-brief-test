@@ -12,6 +12,14 @@ UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
 
 def collect_urls(brief):
     urls=[]
+    # 新 schema (render.py): highlights / sections[].categories[].items / flash
+    for h in brief.get("highlights",[]): urls.append(("highlight", h["title"], h["url"]))
+    for sec in brief.get("sections",[]):
+        label = sec.get("label","")
+        for cat in sec.get("categories",[]):
+            cname = cat.get("title","")
+            for it in cat.get("items",[]): urls.append((f"{label}/{cname}", it["title"], it["url"]))
+    # 旧 schema 兼容: hot / boards
     for h in brief.get("hot",[]): urls.append(("hot", h["title"], h["url"]))
     for bname, board in brief.get("boards",{}).items():
         for cat, items in board.items():

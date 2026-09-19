@@ -195,8 +195,15 @@ def main():
     # ① 过滤
     kept = [it for it in items if is_ai_related(it)]
     filtered_out = [it for it in items if not is_ai_related(it)]
-    # ② 去重
+    # ② 去重（同批）
     deduped, dup_log = dedup(kept)
+    # ②b 跨天去重（防 GitHub 榜等常驻内容重复；官方 blog 已按时间窗过滤）
+    try:
+        from dedup_history import filter_seen
+        deduped, cross_day_dropped = filter_seen(deduped)
+    except Exception as e:
+        cross_day_dropped = []
+        print(f"[warn] 跨天去重跳过: {e}", file=sys.stderr)
     # ③ 分类
     for it in deduped:
         board, cat = classify(it)
@@ -224,7 +231,11 @@ def main():
     R.append("   过滤掉的样例(非AI相关):")
     for it in filtered_out[:8]:
         R.append(f"     ✗ [{it['source']}] {it['title'][:50]}")
-    R.append(f"\n② 去重: {len(kept)} → {len(deduped)} 条 (合并 {len(kept)-len(deduped)} 条)")
+    R.append(f"\n② 去重: {len(kept)} → {len(deduped)} 条 (同批合并 {len(kept)-len(deduped)-len(cross_day_dropped)}, 跨天历史去重 {len(cross_day_dropped)})")
+    if cross_day_dropped:
+        R.append("   跨天去重(此前已发过，跳过):")
+        for it in cross_day_dropped[:8]:
+            R.append(f"     ⏭️  [{it['source']}] {it['title'][:46]}")
     if dup_log:
         R.append("   跨源合并的事件:")
         for title, srcs in dup_log[:8]:

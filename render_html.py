@@ -147,7 +147,7 @@ def render(data):
     <span class="hot-kicker">🔥 今日重点</span>
     <h2><a href="{esc(h['url'])}" target="_blank" rel="noopener">{esc(h['title'])}</a></h2>
     <p>{esc(h.get('summary',''))}</p>
-    <div class="why"><b>为什么重要：</b>{esc(h.get('why',''))}</div>
+    <div class="why"><b>新闻要点：</b>{esc(h.get('why',''))}</div>
   </div>""")
 
     # AI 板块
